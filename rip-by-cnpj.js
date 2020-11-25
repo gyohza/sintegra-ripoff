@@ -5,6 +5,7 @@
 // @grant       none
 // @version     1.0
 // @author      -
+// @runat       document-end
 // @description 11/25/2020, 10:05:22 AM
 // ==/UserScript==
 
@@ -36,3 +37,20 @@ function parseSint() {
 }
 
 window.parseSint = parseSint;
+
+const obs = new MutationObserver((mutList, obs) => {
+  document.getElementById('iframe-st').onload = evt => {
+    const storage = JSON.parse(localStorage.getItem('cnpjOutputList')) || {};
+    const search = Object.fromEntries(
+      [...new URLSearchParams(location.search).entries()]
+    );
+    if (search.cnpj) {
+      storage[search.cnpj] = parseSint();
+      localStorage.setItem('cnpjOutputList', JSON.stringify(storage));
+    }
+    obs.disconnect();
+  }
+});
+
+obs.observe(document.querySelector('.be-content'),
+    {childList: true, subtree: true});
